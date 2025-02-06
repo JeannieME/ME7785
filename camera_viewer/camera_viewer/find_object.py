@@ -7,6 +7,8 @@ import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import CompressedImage
 from rclpy.qos import QoSProfile, QoSDurabilityPolicy, QoSReliabilityPolicy, QoSHistoryPolicy
+from geometry_msgs.msg import Point 
+from std_msgs.msg import Float32
 
 import sys
 
@@ -51,7 +53,14 @@ class RobotVideoSubscriber(Node):
 				self._image_callback,
 				image_qos_profile)
 		self._video_subscriber # Prevents unused variable warning.
+
+		#Declare that the robot_video_subscriber node is publishing _____
+		self.point_publisher = self.create_publisher(Point,'/obj_loc',10)
+		timer_period = 0.1  # seconds
+		self.obj_loc = Point()
+		self.timer = self.create_timer(timer_period, self.timer_callback)
 		
+	
     # DO NOT NEED THIS
 	# def get_user_input(self):
 		#return self._user_input
@@ -101,16 +110,18 @@ class RobotVideoSubscriber(Node):
 
 				# Get pixel locations
 				pixel_loc = np.column_stack(np.where(mask == 255))
-				center_x = x + w // 2
-				center_y = y + h // 2
+				center_x = x + w / 2
+				center_y = y + h / 2
 				print(f"Bounding box at ({x}, {y}, {w}, {h}) with center at ({center_x}, {center_y})")
-
+				self.obj_loc.x = center_x
+				self.obj_loc.y = center_y
+				self.obj_loc.z = float(self._imgBGR.shape[1])
 		# Display the result image
 		#cv2.imshow(self._titleOriginal, frame)
 
-
-	
-
+	def timer_callback(self):
+		self.point_publisher.publish(self.obj_loc)
+		print(f"Publish Point {self.obj_loc}")
 
 def main():
 	rclpy.init() #init routine needed for ROS2.

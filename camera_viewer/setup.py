@@ -22,7 +22,8 @@ setup(
         'console_scripts': [
             'camera_viewer=camera_viewer.view_image_raw2:main',
             'view_camera=camera_viewer.view_image_raw:main',
-            'find_object=camera_viewer.find_object:main'  
+            'find_object=camera_viewer.find_object:main',
+            'rotate_robot=camera_viewer.rotate_robot:main'  
         ],
     },
 )
